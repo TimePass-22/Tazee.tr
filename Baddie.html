@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Surprise</title>
+    <style>
+        body { background: #fff0f3; font-family: 'Arial', sans-serif; text-align: center; margin: 0; overflow-x: hidden; }
+        .screen { background-image: url(Bg.jpeg);display: none; min-height: 100vh; flex-direction: column; justify-content: center; align-items: center; padding:70px 50px; box-sizing: border-box; background-size: 220px; background-position: center; }
+        .active { display: flex; }
+        .room-dim { background: #1a1a2e !important; }
+        .room-bright { background-image: url(Bg.jpeg) !important; transition: background 1s ease; }
+    
+    /*Backgound for English Poetry*/
+        #s3 { background-size: 150px; background-image: linear-gradient(rgba(255, 240, 243, 0.7), rgba(255, 240, 243, 0.7)), url('Poetry.jpeg'); }
+        #s4 { background-size: 180px; background-image: linear-gradient(rgba(255, 240, 243, 0.7), rgba(255, 240, 243, 0.7)), url('Poetry2.jpeg'); }
+        #final-1, #final-2 {background-image:url('Backgound.jpeg'); background-size: 200px; background-position: center; }
+
+        .hanging-box { position: relative; padding-top: 50px; }
+        .string { width: 2px; height: 50px; background: #ff4d6d; margin: 0 auto; }
+        .hanging-text { 
+            display: inline-block; font-size: 2.2rem; font-weight: bold; color: white; background: #ff4d6d; padding: 20px; border-radius: 15px; transform-origin: top center; animation: swing 2s ease-in-out infinite; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        @keyframes swing { 0% { transform: rotate(6deg); } 50% { transform: rotate(-6deg); } 100% { transform: rotate(6deg); } }
+
+        .btn { background: #ff4d6d; color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3); transition: 0.3s; margin-top: 20px; z-index: 10; }
+        .btn:hover { transform: scale(1.05); background: #ff758f; }
+        
+        #mute-btn { position: fixed; bottom: 20px; right: 20px; z-index: 1000; background: rgba(255, 77, 109, 0.7); border-radius: 50%; width: 45px; height: 45px; display: none; align-items: center; justify-content: center; color: white; border: none; cursor: pointer; }
+
+        .poem-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 550px; line-height: 1.8; color: #444; font-size: 1.1rem; border: 1px solid #ffe5ec; white-space: pre-line; text-align: left; margin-bottom: 15px; }
+        
+        .photo-container { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
+        .photo-slot { width: 250px; height: 250px; background: white; border-radius: 15px; display: flex; align-items: center; justify-content: center; color: #ffb7b7; border: 2px dashed #ffcad4; font-size: 0.9rem; cursor: pointer; transition: 0.4s; background-size: cover; background-position: center; }
+        .photo-slot:hover { transform: translateY(-10px) rotate(3deg); border-color: #ff4d6d; }
+
+        #side-bar { position: fixed; top: 0; right: -100%; width: 85%; max-width: 300px; height: 100%; background: white; box-shadow: -10px 0 30px rgba(0,0,0,0.15); z-index: 1000; transition: 0.5s ease-in-out; padding: 50px 25px; text-align: left; box-sizing: border-box; border-radius: 30px 0 0 30px; }
+        #side-bar.open { right: 0; }
+        .close-drawer { color: #ff4d6d; font-weight: bold; cursor: pointer; margin-bottom: 20px; display: block; }
+
+        .light-string { position: fixed; top: 0; left: 0; width: 100%; display: none; justify-content: space-around; padding: 10px 0; z-index: 100; }
+        .bulb { width: 12px; height: 12px; border-radius: 50%; animation: glow 1s infinite alternate; }
+        @keyframes glow { from { box-shadow: 0 0 2px #fff; opacity: 0.6; } to { box-shadow: 0 0 15px #fff; opacity: 1; } }
+        #big-cake { font-size: 120px; display: none; margin: 20px; }
+
+        /* Hover effect for Poem Cards on Final 1 and Final 2 */
+        #final-1 .poem-card:hover, #final-2 .poem-card:hover {
+            transform: scale(1.02) translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 77, 109, 0.2);
+            border-color: #ff4d6d;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: #fffafa;
+        }
+
+        #final-2 .btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        #final-2 .btn:hover {
+            background: #c9184a; 
+            padding-right: 50px; 
+            transform: scale(1.1);
+        }
+
+        #final-2 .btn:hover::after {
+            content: '🔄';
+            position: absolute;
+            right: 15px;
+            animation: spinRestart 1s infinite linear;
+        }
+
+        @keyframes spinRestart {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
+
+        #final-2 h1 {
+            animation: floatTitle 3s ease-in-out infinite;
+        }
+
+        @keyframes floatTitle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop playsinline webkit-playsinline>
+        <source src="Happy_Happy.mp3" type="audio/mpeg">
+    </audio>
+
+    <button id="mute-btn" onclick="toggleMute()">🔊</button>
+
+    <div id="side-bar">
+        <span class="close-drawer" onclick="closeDrawer()">✕ Close</span>
+        <h2 id="drawer-title" style="color:#ff4d6d">Memory Note</h2>
+        <p id="drawer-text" style="color:#555;">Writing goes here...</p>
+    </div>
+
+    <div id="s1" class="screen active">
+        <h1>Happy Birthday! 🎂</h1>
+        <p style="color: yellow; size: 25cm";>Something special is about to unfold...</p>
+        <button class="btn" onclick="startExperience()">Let's Celebrate! ✨</button>
+    </div>
+
+    <div id="s2" class="screen room-dim">
+        <div class="light-string" id="fairy-lights"></div>
+        <h1 id="decor-title" style="color: white;">The room is a bit dark...</h1>
+        <button class="btn" id="light-btn" onclick="turnOnLights()">💡 Turn on the Lights</button>
+        <button class="btn" id="cake-btn" style="display:none;" onclick="showCake()">Here is yr cake 🎂</button>
+        <div id="big-cake">🎂</div>
+        <button class="btn" id="eat-btn" style="display:none;" onclick="show('sHanging')">Finish eating cake? 🍴</button>
+    </div>
+
+    <div id="sHanging" class="screen">
+        <div class="hanging-box">
+            <div class="string"></div>
+            <div class="hanging-text">NOW HERE'S <br> SOMETHING FOR U</div>
+        </div>
+        <button class="btn" onclick="show('s3')">Open Message 💌</button>
+    </div>
+
+    <div id="s3" class="screen">
+        <h1>A Special Message</h1>
+        <div class="poem-card">
+            Happy Birthday to the most beautiful blessing in my life 🎂🌷**
+
+            You entered my world like a quiet light ☀️,
+            soft but steady,
+            and you stayed 
+            even when my skies were heavy with rain 🌧️
+ 
+            When I felt like I was “too much,”
+            you never stepped back.
+            You listened to my silence 🫂,
+            held my storms,
+            and lifted me when I couldn’t stand on my own 💫
+
+            Loyalty like yours is rare 💎,
+            love like yours is priceless.
+            Every day I thank God for you 🙏❤️
+            because not everyone is blessed
+            with someone who doesn’t just arrive —
+            but truly stays 🤍✨
+
+            And on this day, I pray for you 🌷
+            for your peace 🕊️, your happiness 🌸,
+            and dreams that unfold beautifully 🌟
+            May life give you back
+            all the warmth you give to others and more 🤍💞
+
+        </div>
+        <button class="btn" onclick="show('s4')">Click for nxt page ➔</button>
+    </div>
+
+    <div id="s4" class="screen">
+        <h1> آپ کے لیے🌸</h1>
+        <div class="poem-card">
+           With you, I don’t have to pretend.
+            I don’t have to wear strength like armor, when my heart feels tired.
+            In a world that overwhelms me 
+            you became my quiet refuge my safe place.
+
+            When everything feels loud and chaotic 🌊,
+            your voice is calm.
+            When my thoughts spiral endlessly ✨,
+            your words bring light.
+
+            There’s comfort in knowing
+            that no matter what happens,
+            I have you 🤍
+
+            Not just so meone to talk to —
+            but someone I trust
+            with my unspoken fears,
+            my fragile thoughts,
+            my most vulnerable side 🫀
+
+            And that kind of safety…
+            means more
+            than I could ever put into words. 🤍✨
+        </div>
+        <button class="btn" onclick="show('m1')">View Memories 📸</button>
+    </div>
+
+    <div id="m1" class="screen">
+        <h1>Memory 1 & 2</h1>
+        <div class="photo-container">
+            <div class="photo-slot" style="background-image: url('Memory1.jpeg'); color: transparent;" onclick="openDrawer('Day 1', '🫶🏻🥹❤️‍🩹')">Photo 1</div>
+            <div class="photo-slot" style="background-image: url('Memory2.jpeg'); color: transparent;" onclick="openDrawer('Day 2', '💗🎀👸🏻')">Photo 2</div>
+        </div>
+        <button class="btn" onclick="show('m2')">Nxt ➔</button>
+    </div>
+
+    <div id="m2" class="screen">
+        <h1>Memory 3 & 4</h1>
+        <div class="photo-container">
+             <div class="photo-slot" style="background-image: url('Memory3.jpeg'); color: transparent;" onclick="openDrawer('Day 3', '𓍯𓂃𓏧♡💫👀💞🫶 (˶˃ ᵕ ˂˶) .ᐟ.ᐟ (˶˃ ᵕ ˂˶) .ᐟ.ᐟ')">Photo 3</div>
+            <div class="photo-slot"  style="background-image: url('Memory4.jpeg'); color: transparent;" onclick="openDrawer('Day 4', 'Wifyy👰🏻💗💋')">Photo 4</div>
+        </div>
+        <button class="btn" onclick="show('m3')">Nxt ➔</button>
+    </div>
+
+    <div id="m3" class="screen">
+        <h1>Memory 5 & 6</h1>
+        <div class="photo-container">
+           <div class="photo-slot" style="background-image: url('Memory5.jpeg'); color: transparent;" onclick="openDrawer('Day 5', 'ℒ𝓸𝓿𝒆 𝔂𝓸𝓾 ᥫ᭡.')">Photo 5</div>
+         <div class="photo-slot" style="background-image: url('Memory6.jpeg'); color: transparent;" onclick="openDrawer('Day 6', '🫵🏻ـــــــــــــــﮩ٨ـ❤️️')">Photo 6</div></div><button class="btn" onclick="show('m4')">Nxt</button>
+        </div>
+   <div id="m4" class="screen">
+    <h1>Memory 7 & 8</h1>
+    <div class="photo-container">
+        <div class="photo-slot" style="background-image: url('Memory7.jpeg'); color: transparent;" onclick="openDrawer('Photo 7','𝐈 𝐥𝐨𝐯𝐞 𝐲𝐨𝐮 𝐌𝐞𝐫𝐢 𝐉𝐚𝐧')">7</div>
+        <div class="photo-slot" style="background-image: url('Memory8.jpeg'); color: transparent; background: size 150px;" onclick="openDrawer('Photo 8','🤍🫶🏼✨️𓍯𓂃𓏧♡')">8</div></div><button class="btn" onclick="show('m5')">Nxt</button></div>
+    
+        <div id="m5" class="screen">
+            <h1>Memory 9 & 10</h1>
+            <div class="photo-container">
+                <div class="photo-slot"style="background-image: url(Memory9.jpeg); color: transparent;" onclick="openDrawer('Photo 9','l ִֶָ. ..𓂃 ִֶָ🦋་༘ ᥫ᭡.࿐')">9</div>
+                <div class="photo-slot" style="background-image: url(Memory10.jpeg); color: transparent;" onclick="openDrawer('Photo 10','SUKOON💕🤞🏻')">10</div></div><button class="btn" onclick="show('final-1')">Nxt ➔</button></div>
+
+    <div id="final-1" class="screen">
+        <h1>Almost there...</h1>
+        <div class="poem-card">
+            <strong>Message One</strong>
+           Being younger than you has honestly been one of my biggest blessings 🌷 I’ve learned so much just by watching how you handle life. The way you choose peace over ego 🕊️, the way you think deeply before reacting, the way you protect your energy while still caring for others — it inspires me every day ✨ Your advice isn’t just words; it’s guidance that has shaped my mindset and my growth 🌱 There were times I felt lost, and your perspective became my direction 🧭 Thank you for correcting me with love and guiding me with patience 🤍
+        </div>
+        <div class="poem-card">
+            <strong>Message Two</strong>
+            AIn a world that can be harsh and temporary, your heart remains soft and genuine 🤍 That’s something I admire deeply. You care without conditions, you love sincerely, and you show up for people even when you’re tired 🫶 You make others feel valued, heard, and important And I hope one day you truly realize how special you are. Your kindness is not weakness — it’s strength,The world needs more hearts like yours.In a world that can be harsh and temporary, your heart remains soft and genuine 🤍 That’s something I admire deeply. You care without conditions, you love sincerely, and you show up for people even when you’re tired You make others feel valued, heard, and important, And I hope one day you truly realize how special you are. Your kindness is not weakness it’s strength 💎 The world needs more hearts like yours.        </div>
+        <button class="btn" onclick="show('final-2')">And the last ➔</button>
+    </div>
+
+    <div id="final-2" class="screen">
+        <h1>Final Words</h1>
+        <div class="poem-card">
+            <strong>Tried Writing in Gujrati (sry if it is wrong)</strong>
+           When I think about us, I smile  Not just because of the big moments, but because of the small ones too. The random laughs The serious late-night talks The times you checked on me without me asking 🤍 Even the comfortable silence between us means something. You’ve been part of some of the most important chapters of my life  And no matter where life takes us, those memories will always stay close to my heart 💌 </div>
+        <div class="poem-card">
+            <strong>I HOPE U LIKED IT</strong>
+           On your birthday, I don’t just wish you happiness I pray for your peace  I pray that life rewards your kindness and protects your heart  I pray your dreams unfold beautifully  and success follows you everywhere you go  You deserve love that is steady, friendships that are genuine, and a future that feels secure and bright Thank you for being my guide, my comfort, my strength, and my blessing  Happy Birthday to someone who is more than a friend — someone who holds a permanent place in my heart ❤️🎂        </div>
+        <button class="btn" onclick="show('s1')">Restart 🔄</button>
+    </div>
+
+    <script>
+        var music = document.getElementById('bgMusic');
+
+        function startExperience() {
+            if (music) {
+                music.play().catch(e => console.log("Audio blocked"));
+            }
+            document.getElementById('mute-btn').style.display = 'flex';
+            show('s2');
+        }
+
+        function toggleMute() {
+            if (music.muted) {
+                music.muted = false;
+                document.getElementById('mute-btn').innerText = "🔊";
+            } else {
+                music.muted = true;
+                document.getElementById('mute-btn').innerText = "🔇";
+            }
+        }
+
+        function show(id) {
+            var screens = document.getElementsByClassName('screen');
+            for(var i=0; i<screens.length; i++) { screens[i].classList.remove('active'); }
+            document.getElementById(id).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function turnOnLights() {
+            var s2 = document.getElementById('s2');
+            s2.classList.remove('room-dim'); s2.classList.add('room-bright');
+            document.getElementById('fairy-lights').style.display = 'flex';
+            const string = document.getElementById('fairy-lights');
+            if(string.children.length === 0) {
+                for(let i=0; i<15; i++) {
+                    let b = document.createElement('div'); b.className = 'bulb';
+                    b.style.backgroundColor = ['#ff4d6d', '#ffb703', '#00f5d4', '#fee440', '#9b5de5'][i%5];
+                    b.style.animationDelay = (i*0.1)+'s'; string.appendChild(b);
+                }
+            }
+            document.getElementById('decor-title').innerText = "That's better! ✨";
+            document.getElementById('decor-title').style.color = "#ff4d6d";
+            document.getElementById('light-btn').style.display = "none";
+            document.getElementById('cake-btn').style.display = "inline-block";
+        }
+
+        function showCake() {
+            document.getElementById('big-cake').style.display = 'block';
+            document.getElementById('cake-btn').style.display = 'none';
+            document.getElementById('eat-btn').style.display = 'inline-block';
+        }
+
+        function openDrawer(title, text) {
+            document.getElementById('drawer-title').innerText = title;
+            document.getElementById('drawer-text').innerText = text;
+            document.getElementById('side-bar').classList.add('open');
+        }
+
+        function closeDrawer() { document.getElementById('side-bar').classList.remove('open'); }
+    </script>
+</body>
+</html>
